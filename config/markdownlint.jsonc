@@ -1,0 +1,13 @@
+{
+  // markdown-review プラグイン共通の markdownlint 設定。
+  // 文書種別（technical / blog）に依らず構造チェックはこの 1 つを使う。
+  "config": {
+    "MD013": false,
+    "MD033": {
+      "allowed_elements": ["br"]
+    },
+    "MD025": {
+      "front_matter_title": ""
+    }
+  }
+}
