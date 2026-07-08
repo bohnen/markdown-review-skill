@@ -9,20 +9,22 @@ Markdown を **markdownlint + textlint** で機械レビューし、さらに **
 
 ## 必要なツール
 
-環境にある linter をそのまま使う。無い場合はプラグインが**インストール方法を問い合わせる**（自動インストールはしない）。
+機械 lint（markdownlint + textlint）は、固定版の linter とプリセットを焼き込んだ **Docker イメージ**で実行する。依存は **Docker のみ**。ホストへの linter グローバル導入は不要で、フォールバックも無い（Docker が無ければ実行せず、導入方法を案内する）。
 
-- [`textlint`](https://textlint.org/) と 2 つのプリセット
-  - `textlint-rule-preset-ja-technical-writing`
-  - `textlint-rule-preset-jtf-style`
-- [`markdownlint-cli2`](https://github.com/DavidAnson/markdownlint-cli2)
+- [Docker](https://docs.docker.com/get-docker/)（要インストール）
 
-インストール例（pnpm global の場合）:
+イメージ（`markdown-review:0.2.0`）はリポジトリ同梱の `docker/Dockerfile` から作る。初回実行時にラッパーが自動でビルドするため通常は手動操作は不要だが、明示的にビルドしたい場合:
 
 ```sh
-pnpm add -g textlint textlint-rule-preset-ja-technical-writing textlint-rule-preset-jtf-style markdownlint-cli2
+docker build -t markdown-review:0.2.0 docker/
 ```
 
-（`npm i -g ...` でも可。textlint はプリセットが解決できないと動かないため、textlint 本体と同じ場所にプリセットを入れる。）
+イメージには以下が固定版で含まれる（`node:24-alpine` ベース）。`NODE_PATH` によりプリセット解決を保証するため、環境差で textlint が壊れることがない。
+
+- [`textlint`](https://textlint.org/) と 2 プリセット（`textlint-rule-preset-ja-technical-writing` / `textlint-rule-preset-jtf-style`）
+- [`markdownlint-cli2`](https://github.com/DavidAnson/markdownlint-cli2)
+
+> 実行は cwd をコンテナにマウントする方式のため、**対象ファイルはプロジェクトルート配下の相対パス**で指定する（プロジェクトルートから呼ぶ）。
 
 ## インストール（ローカル）
 
@@ -63,7 +65,7 @@ pnpm add -g textlint textlint-rule-preset-ja-technical-writing textlint-rule-pre
 
 1. 対象ファイルを特定する。
 2. 文書種別（technical / blog）を決める。未指定ならたずねる。
-3. `markdownlint-cli2` / `textlint` の有無とプリセット解決を確認する（無ければインストール方法を問い合わせる）。
+3. Docker とイメージの有無を確認する（Docker が無ければ導入を案内し、イメージが無ければ初回に自動ビルドする）。
 4. 種別に応じた設定を選ぶ（`config/` を使用）。
 5. 機械 lint を軽量サブエージェントに委譲（`--fix` → 手修正 → 0 件確認）。事実・主張は変更しない。
 6. 日本語文書なら文章規範レビューを提案として返す。
