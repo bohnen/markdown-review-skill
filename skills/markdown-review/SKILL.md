@@ -25,44 +25,43 @@ markdownlint は種別に依らず共通設定を使う。
 - ユーザーが「技術文書として」「ブログとして」等と明示していればそれに従う。
 - **明示が無ければユーザーにたずねる**（AskUserQuestion。既定動作）。パスや frontmatter（`pubDatetime` や `tags` を持つ AstroPaper 風など）から推測できる場合は、推測と根拠を提示したうえで確認する。誤ったルール適用を避けるため、推測だけで確定しない。
 
-### 3. linter の検出（まず環境にあるものを使う）
+### 3. コンテナの確認（機械 lint は Docker で実行する）
+
+機械 lint は、固定版の linter を焼き込んだ Docker イメージ経由で実行する。ラッパー `${CLAUDE_PLUGIN_ROOT}/bin/mdreview.sh` が docker とパスを隠蔽する。
 
 ```bash
-command -v markdownlint-cli2
-command -v textlint
+command -v docker
 ```
 
-- どちらか欠けていれば **自動インストールせず、インストール方法をユーザーに問い合わせる**（例: `pnpm add -g` / `npm i -g` / `brew` のどれを使うか）。
-- textlint はプリセットが解決できないと動かない。微小サンプルで一度実行し、`No rules found` または `Cannot find module ...preset...` が出たら **プリセット未導入** と判断し、`textlint-rule-preset-ja-technical-writing` と `textlint-rule-preset-jtf-style` のインストール方法をユーザーに問い合わせる。
-
-  ```bash
-  printf 'テスト。\n' > /tmp/_mdreview_probe.md
-  textlint -c "${CLAUDE_PLUGIN_ROOT}/config/technical.textlintrc.json" /tmp/_mdreview_probe.md; echo "exit=$?"
-  ```
-
-  正常に走れば（`No rules found` が出なければ）プリセットは利用可能。
+- **Docker が無ければ実行しない。** ホスト linter へのフォールバックは無い。Docker の導入方法（<https://docs.docker.com/get-docker/>）を案内する。
+- イメージ（`markdown-review:0.2.0`）が未ビルドなら、ラッパーが初回に自動で `docker build` する（レジストリ非依存）。プリセット解決はイメージ内の `NODE_PATH` が保証するため、ホスト側のプローブは不要。
+- 対象ファイルは **cwd（プロジェクトルート）配下の相対パス**で渡す（ラッパーが cwd を `/work` にマウントする）。
 
 ### 4. 設定の選択
 
-- textlint: `${CLAUDE_PLUGIN_ROOT}/config/technical.textlintrc.json` または `${CLAUDE_PLUGIN_ROOT}/config/blog.textlintrc.json`
-- markdownlint: `${CLAUDE_PLUGIN_ROOT}/config/markdownlint.jsonc`（共通）
+設定はリポジトリの `config/` が正で、コンテナへ read-only でマウントされる（ラッパーが `/config` に配置）。種別で textlint 設定を切り替える。
+
+- textlint: `technical`（`config/technical.textlintrc.json`）または `blog`（`config/blog.textlintrc.json`）
+- markdownlint: `config/markdownlint.jsonc`（共通）
+
+ラッパーには種別名（`technical` / `blog`）だけを渡せばよく、パスは意識しなくてよい。
 
 ### 5. 機械レビュー（軽量モデルのサブエージェントに委譲）
 
-`general-purpose` + `model: haiku` のサブエージェントを起動し、次の手順を渡す（`${CLAUDE_PLUGIN_ROOT}` と選択した種別は実際の値に展開して渡すこと）。
+`general-purpose` + `model: haiku` のサブエージェントを起動し、次の手順を渡す（`${CLAUDE_PLUGIN_ROOT}` と選択した種別は実際の値に展開して渡すこと）。ラッパーは実行ビットに依存しないよう `sh` 経由で呼ぶ。
 
 1. 現状把握:
 
    ```bash
-   markdownlint-cli2 --config "<PLUGIN>/config/markdownlint.jsonc" "<file>"
-   textlint -c "<PLUGIN>/config/<type>.textlintrc.json" "<file>"
+   sh "<PLUGIN>/bin/mdreview.sh" markdownlint "<file>"
+   sh "<PLUGIN>/bin/mdreview.sh" textlint <type> "<file>"
    ```
 
-2. 自動修正:
+2. 自動修正（`--fix` はマウント越しにホストのファイルへ書き戻る）:
 
    ```bash
-   markdownlint-cli2 --fix --config "<PLUGIN>/config/markdownlint.jsonc" "<file>"
-   textlint --fix -c "<PLUGIN>/config/<type>.textlintrc.json" "<file>"
+   sh "<PLUGIN>/bin/mdreview.sh" markdownlint --fix "<file>"
+   sh "<PLUGIN>/bin/mdreview.sh" textlint <type> --fix "<file>"
    ```
 
 3. 残ったエラーを手修正する。事実・主張・固有名・数値は書き換えず、lint 由来の整形と表記だけを直す。
