@@ -1,1 +1,7 @@
 node_modules/
+
+# Claude Code のセッション状態（ローカルパス・セッションID等を含む）
+.omc/
+
+# macOS
+.DS_Store
