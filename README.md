@@ -26,12 +26,17 @@ docker build -t markdown-review:0.2.0 docker/
 
 > 実行は cwd をコンテナにマウントする方式のため、**対象ファイルはプロジェクトルート配下の相対パス**で指定する（プロジェクトルートから呼ぶ）。
 
-## インストール（ローカル）
+## インストール
+
+GitHub リポジトリをマーケットプレイスとして追加してインストールする。
 
 ```
-/plugin marketplace add ~/Project/markdown-review
-/plugin install markdown-review@markdown-review
+/plugin marketplace add bohnen/markdown-review-skill
+/plugin install markdown-review@markdown-review-skill
 ```
+
+- `markdown-review@markdown-review-skill` は `<plugin 名>@<marketplace 名>`。plugin 名は `markdown-review`、marketplace 名（リポジトリと同名）は `markdown-review-skill`。
+- ローカルで開発・改変する場合は、クローンしたディレクトリを直接指定する（例: `/plugin marketplace add ~/Project/markdown-review`）。
 
 ## 使い方
 
