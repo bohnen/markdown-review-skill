@@ -1,0 +1,32 @@
+# ========================================
+# 書籍原稿向け prh 辞書（親ファイル）
+#
+# 構成:
+#   dict/               ics.media「テキスト校正くん」由来の校正辞書（出典は README.md）
+#   prh-book-common.yml 書籍共通の追補（出版社の表記統一指示をルール化）
+#   prh-cho-on-extra.yml 長音表記の追補（-er/-or/-ar は長音付き、の方針を ics 辞書に無い語へ拡張）
+#
+# プロジェクト固有の固有名詞（製品名など）は、このファイルではなく
+# プロジェクト側の prh ファイル（prh-project-template.yml を雛形にする）で管理する。
+# ========================================
+version: 1
+
+imports:
+  # 誤字
+  - ./dict/prh_idiom.yml
+  # ひらく漢字
+  - ./dict/prh_open_close.yml
+  # 冗長な表現
+  - ./dict/prh_redundancy.yml
+  # 重言
+  - ./dict/prh_duplicate.yml
+  # 外来語カタカナ表記（長音）
+  - ./dict/prh_cho_on.yml
+  # 固有名詞（社名・ブランド名）
+  - ./dict/prh_corporation.yml
+  # 技術用語
+  - ./dict/prh_web_technology.yml
+  # 書籍共通の追補
+  - ./prh-book-common.yml
+  # 長音の追補
+  - ./prh-cho-on-extra.yml

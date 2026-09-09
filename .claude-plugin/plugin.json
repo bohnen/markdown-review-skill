@@ -1,8 +1,17 @@
 {
   "name": "markdown-review",
-  "version": "0.2.0",
-  "description": "Markdown を markdownlint と textlint で機械レビューし、日本語技術文書の文章規範に照らして推敲する。技術文書は textlint 標準ルール、ブログは専用ルールを使い分ける。",
-  "author": { "name": "Bohnen" },
+  "version": "0.3.0",
+  "description": "Markdown を markdownlint と textlint で機械レビューし、日本語技術文書の文章規範に照らして推敲する。技術文書は textlint 標準ルール、ブログは専用ルール、書籍原稿は prh 表記辞書付きルールを使い分ける。",
+  "author": {
+    "name": "Bohnen"
+  },
   "license": "Apache-2.0",
-  "keywords": ["markdown", "textlint", "markdownlint", "review", "japanese", "technical-writing"]
+  "keywords": [
+    "markdown",
+    "textlint",
+    "markdownlint",
+    "review",
+    "japanese",
+    "technical-writing"
+  ]
 }
