@@ -1,0 +1,16 @@
+{
+  "filters": {
+    "comments": true,
+    "allowlist": {
+      "allow": []
+    }
+  },
+  "rules": {
+    "preset-ja-technical-writing": true,
+    "prh": {
+      "rulePaths": [
+        "/config/prh/prh.yml"
+      ]
+    }
+  }
+}
